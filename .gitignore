@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+config.env
+
+credentials/
+.env
+venv/
+service_account.json
