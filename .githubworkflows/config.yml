@@ -1,0 +1,31 @@
+name: Run Lead Qualifier
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # runs every day at 9am UTC
+  workflow_dispatch:  # also lets you run it manually from GitHub
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials/service_account.json
+
+      - name: Create config.env
+        run: echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > config.env
+
+      - name: Run script
+        run: python main.py
