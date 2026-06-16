@@ -26,7 +26,7 @@ jobs:
                 mkdir -p credentials
                 printenv GOOGLE_CREDENTIALS > credentials/service_account.json
               env:
-                GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+                GOOGLE_CREDENTIALS: ${{ secrets.SERVICE_ACCOUNT }}
 
       - name: Create config.env
         run: echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > config.env
