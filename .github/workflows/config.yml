@@ -22,9 +22,11 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Create credentials file
-        run: |
-          mkdir -p credentials
-          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials/service_account.json
+              run: |
+                mkdir -p credentials
+                printenv GOOGLE_CREDENTIALS > credentials/service_account.json
+              env:
+                GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
       - name: Create config.env
         run: echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > config.env
