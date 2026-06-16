@@ -1,7 +1,5 @@
 name: Run Lead Qualifier
 
-name: Run Lead Qualifier
-
 on:
   schedule:
     - cron: '0 9 * * *'
