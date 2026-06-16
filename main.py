@@ -55,22 +55,29 @@ Respond in this exact JSON format:
 
 Respond with JSON only, no other text.
 """
-    response = client_ai.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    json_string = response.choices[0].message.content
-    result = json.loads(json_string)
-    
-    print("Score:", result["score"])
-    print("Status:", result["status"])
-    print("Next Action:", result["next_action"])
-    print("Reason:", result["reason"])
+    try:
+        response = client_ai.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        json_string = response.choices[0].message.content
+        result = json.loads(json_string)
+        
+        print("Score:", result["score"])
+        print("Status:", result["status"])
+        print("Next Action:", result["next_action"])
+        print("Reason:", result["reason"])
 
-    sheet.update_cell(sheet_row, 5, result["score"])
-    sheet.update_cell(sheet_row, 6, result["status"])
-    sheet.update_cell(sheet_row, 7, result["next_action"])
+        sheet.update_cell(sheet_row, 5, result["score"])
+        sheet.update_cell(sheet_row, 6, result["status"])
+        sheet.update_cell(sheet_row, 7, result["next_action"])
+    except Exception as e:
+        print(f"Error processing lead {row['Name']}: {e}")
+        
+        sheet.update_cell(sheet_row, 5, "Error")
+        sheet.update_cell(sheet_row, 6, "Error")
+        sheet.update_cell(sheet_row, 7, "Error")
 
 def main():
     sheet = get_sheet()
