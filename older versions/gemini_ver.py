@@ -6,15 +6,14 @@ and writes the results back to the sheet.
 
 import os
 import gspread
-import json
 from google.oauth2.service_account import Credentials
-from groq import Groq
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv("config.env")
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-client_ai = Groq(api_key=GROQ_API_KEY)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+client_ai = genai.Client(api_key=GEMINI_API_KEY)
 
 # --- Configuration ---
 SCOPES = [
@@ -34,7 +33,7 @@ def get_sheet():
     return spreadsheet.sheet1
 
 
-def qualify_lead(sheet, row, sheet_row):
+def qualify_lead(row):
     prompt = f"""
 You are a lead qualification assistant for a solar installation company.
 Score the following lead from 1-10 and provide a next action.
@@ -55,31 +54,20 @@ Respond in this exact JSON format:
 
 Respond with JSON only, no other text.
 """
-    response = client_ai.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}]
+    response = client_ai.models.generate_content(
+        model="gemini-2.0-flash-lite",
+        contents=prompt
     )
-    
-    json_string = response.choices[0].message.content
-    result = json.loads(json_string)
-    
-    print("Score:", result["score"])
-    print("Status:", result["status"])
-    print("Next Action:", result["next_action"])
-    print("Reason:", result["reason"])
-
-    sheet.update_cell(sheet_row, 5, result["score"])
-    sheet.update_cell(sheet_row, 6, result["status"])
-    sheet.update_cell(sheet_row, 7, result["next_action"])
+    print(response.text)
 
 def main():
     sheet = get_sheet()
     rows = sheet.get_all_records()
-
-    for index, row in enumerate(rows):
-        if row["Status"] == "":
-            sheet_row = index + 2
-            qualify_lead(sheet, row, sheet_row)
+    new_leads = [row for row in rows if row["Status"] == ""]
+    
+    # Step 5: test on first lead only
+    qualify_lead(new_leads[0])
+    
 
 
 if __name__ == "__main__":
