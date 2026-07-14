@@ -1,88 +1,60 @@
-# AI Lead Qualifier
+# Solar Lead Qualifier
 
-An automated lead qualification pipeline that scores incoming sales leads using AI and writes results directly back to a Google Sheet — no manual review required.
+AI-powered lead scoring for solar sales leads. Two modes:
 
-## What It Does
+- **Score a Lead** — fill out a form, get an instant score/status/next action.
+- **Run Sheet Batch** — scans a connected Google Sheet for unscored leads and
+  processes them all (this is the original batch workflow).
 
-- Reads new leads from a Google Sheet (Name, Company, Source, Notes)
-- Sends each unprocessed lead to an LLM (Llama 3.1 via Groq) for scoring
-- AI evaluates each lead and returns a score (1-10), status (Hot/Warm/Cold), recommended next action, and reasoning
-- Writes results back to the corresponding row in the sheet automatically
-- Runs on a daily schedule via GitHub Actions — fully automated
-
-## Tech Stack
-
-- **Python** — core script
-- **Google Sheets API** via `gspread` — read/write lead data
-- **Groq API** (Llama 3.1) — LLM-powered lead scoring
-- **GitHub Actions** — automated daily scheduling
-- **python-dotenv** — environment variable management
-
-## Project Structure
+## Project structure
 
 ```
-lead-qualifier/
-├── main.py                  # Core script
-├── requirements.txt         # Dependencies
-├── sample_leads.csv         # Sample lead data for testing
-├── .github/
-│   └── workflows/
-│       └── config.yml       # GitHub Actions workflow
-├── credentials/             # Google service account (gitignored)
-└── config.env               # API keys (gitignored)
+app.py         Streamlit UI (start here)
+qualifier.py   Core LLM scoring logic (no UI, no sheets)
+sheets.py      Google Sheets read/write
+main.py        Original CLI batch script (still works standalone)
 ```
 
-## How It Works
+## Local setup
 
-1. Script authenticates with Google Sheets via a service account
-2. Pulls all rows where `Status` is empty (unprocessed leads)
-3. For each lead, builds a prompt with lead details and sends to Groq API
-4. Parses the JSON response and extracts score, status, next action, and reason
-5. Writes results back to the correct row in the sheet
-6. GitHub Actions runs the script daily at 9am UTC automatically
+1. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-## Setup
+2. Create `.streamlit/secrets.toml` (this file is gitignored — never commit it):
+   ```toml
+   GROQ_API_KEY = "your-groq-key-here"
+   ```
 
-### 1. Clone the repo
-```bash
-git clone https://github.com/yourusername/lead-qualifier.git
-cd lead-qualifier
-pip install -r requirements.txt
-```
+3. If using batch/sheet mode, put your Google service account JSON at
+   `credentials/service_account.json` (also gitignored).
 
-### 2. Google Sheets API
-- Create a Google Cloud project and enable the Sheets and Drive APIs
-- Create a service account and download the JSON key
-- Save it to `credentials/service_account.json`
-- Share your Google Sheet with the service account email as Editor
+4. Run it:
+   ```
+   streamlit run app.py
+   ```
 
-### 3. Groq API
-- Sign up at [console.groq.com](https://console.groq.com) and generate a free API key
-- Create a `config.env` file:
-```
-GROQ_API_KEY=your_key_here
-```
+## Deploying (so sales reps get a link, not a file)
 
-### 4. Google Sheet Format
-Your sheet should have these columns:
-| Name | Company | Notes | Source | Score | Status | Next Action |
+1. Push this repo to GitHub. **Double-check `credentials/` and any `.env`
+   files are NOT committed** — check `.gitignore` is doing its job before
+   you push.
+2. Go to [share.streamlit.io](https://share.streamlit.io) → New app → point
+   it at this repo and `app.py`.
+3. In the app's Settings → Secrets, paste:
+   ```toml
+   GROQ_API_KEY = "your-groq-key-here"
+   ```
+   For batch mode, you'll also need to get the service account JSON into
+   the deployed environment securely — either paste its contents as a
+   secret and write it to disk on startup, or skip batch mode in the
+   hosted version and keep it as a local-only script for now.
+4. Share the resulting `*.streamlit.app` URL with your sales team.
 
-### 5. Run locally
-```bash
-python main.py
-```
+## Notes
 
-### 6. Automate with GitHub Actions
-Add two repository secrets under Settings → Secrets:
-- `GROQ_API_KEY` — your Groq API key
-- `SERVICE_ACCOUNT` — contents of your `service_account.json` file
-
-The workflow runs daily at 9am UTC and can also be triggered manually from the Actions tab.
-
-## Example Output
-
-| Name | Score | Status | Next Action |
-|------|-------|--------|-------------|
-| Maria Gonzalez | 8 | Hot | Schedule a discovery call within 24 hours |
-| James Whitfield | 6 | Warm | Follow up to gather more details |
-| Sarah Thompson | 2 | Cold | Send follow-up email to clarify intent |
+- The single-lead form doesn't require Google Sheets access at all — it's
+  the simplest path to a usable tool for reps who just want a quick score.
+- Batch mode requires sheet credentials and matches the original
+  `main.py` behavior exactly.

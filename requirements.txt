@@ -1,5 +1,5 @@
+streamlit
+groq
 gspread
 google-auth
-groq
 python-dotenv
-streamlit
