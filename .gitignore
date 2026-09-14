@@ -1,0 +1,18 @@
+# Secrets
+.env
+credentials.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Local databases and lead data
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs and system files
+*.log
+.DS_Store

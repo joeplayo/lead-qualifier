@@ -1,0 +1,50 @@
+x-app-environment: &app-environment
+  DATABASE_URL: postgresql+psycopg://leadsignal:leadsignal@db:5432/leadsignal
+  GROQ_API_KEY: ${GROQ_API_KEY}
+  GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
+  ADMIN_API_KEY: ${ADMIN_API_KEY}
+  APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
+  SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+  STRIPE_PRICE_STARTER: ${STRIPE_PRICE_STARTER}
+  STRIPE_PRICE_GROWTH: ${STRIPE_PRICE_GROWTH}
+  WORKER_POLL_SECONDS: ${WORKER_POLL_SECONDS:-1}
+  WORKER_STALE_SECONDS: ${WORKER_STALE_SECONDS:-180}
+  QUALIFICATION_MAX_ATTEMPTS: ${QUALIFICATION_MAX_ATTEMPTS:-3}
+  NOTIFICATION_TIMEOUT_SECONDS: ${NOTIFICATION_TIMEOUT_SECONDS:-10}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: leadsignal
+      POSTGRES_USER: leadsignal
+      POSTGRES_PASSWORD: leadsignal
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leadsignal"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment: *app-environment
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    environment: *app-environment
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

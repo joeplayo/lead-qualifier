@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeadLift Admin</title>
+<style>
+:root{color-scheme:dark;--bg:#080a0e;--panel:#11151b;--soft:#171c24;--line:#262e39;--text:#f7f9fc;--muted:#8c98a8;--accent:#72e2ad;--danger:#ff8f9c;--warn:#f3c86a}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+body{background:radial-gradient(circle at 80% -20%,rgba(114,226,173,.08),transparent 30rem),var(--bg)}
+button,input,select{font:inherit}.hidden{display:none!important}.muted{color:var(--muted)}.error{color:#ffabb5;font-size:13px;margin-top:10px}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}.login-card{width:min(430px,100%);border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:28px;box-shadow:0 25px 80px rgba(0,0,0,.35)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:850}.mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#06110c}
+h1{font-size:29px;letter-spacing:-.04em;margin:28px 0 6px}.login-card p{margin:0 0 22px;color:var(--muted);font-size:13px;line-height:1.6}
+label{display:block;color:var(--muted);font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 7px}
+input,select{width:100%;border:1px solid var(--line);border-radius:10px;background:#0c1015;color:var(--text);padding:11px 12px;outline:none}
+input:focus,select:focus{border-color:#4f806c;box-shadow:0 0 0 3px rgba(114,226,173,.08)}
+.btn{border:0;border-radius:10px;background:var(--accent);color:#06110c;padding:10px 13px;font-weight:850;cursor:pointer}.btn.secondary{background:var(--soft);color:var(--text);border:1px solid var(--line)}.btn.danger{background:#32171d;color:#ffc4ca;border:1px solid #5b2832}.btn.small{padding:7px 9px;font-size:11px}.btn.full{width:100%;margin-top:18px}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}.side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);padding:20px 14px;background:rgba(9,11,15,.92)}
+.side .brand{padding:0 8px 18px}.nav-label{font-size:10px;color:#697587;text-transform:uppercase;letter-spacing:.12em;font-weight:850;padding:18px 10px 8px}
+.nav{width:100%;border:0;background:transparent;color:var(--muted);text-align:left;padding:10px 11px;border-radius:10px;margin:2px 0;cursor:pointer;font-weight:700;text-decoration:none;display:block}.nav:hover,.nav.active{background:var(--soft);color:var(--text)}
+.side-bottom{position:absolute;bottom:18px;left:14px;right:14px}.identity{font-size:11px;color:var(--muted);padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow-wrap:anywhere}
+.main{min-width:0;padding:0 28px 50px}.top{height:74px;position:sticky;top:0;z-index:4;background:rgba(8,10,14,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(38,46,57,.7);display:flex;align-items:center;justify-content:space-between}.top h2{margin:0;font-size:20px;letter-spacing:-.03em}.content{max-width:1400px;margin:0 auto;padding-top:24px}.view{display:none}.view.active{display:block}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:18px}.kpi{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#151a22,#10141a);padding:15px}.kpi span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}.kpi strong{display:block;font-size:26px;margin-top:5px;letter-spacing:-.04em}
+.panel{border:1px solid var(--line);border-radius:16px;background:rgba(17,21,27,.9);overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 17px;border-bottom:1px solid var(--line)}.panel-head h3{margin:0;font-size:16px}.panel-head p{margin:4px 0 0;font-size:11px;color:var(--muted)}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);font-size:11px;vertical-align:middle}th{color:#758092;background:#0d1116;text-transform:uppercase;letter-spacing:.06em;font-size:9px}tr:last-child td{border-bottom:0}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 7px;font-size:10px;font-weight:800}.badge.superuser{color:#b9f5d8;border-color:#315d49;background:#10271d}.badge.failed{color:#ffc0c8;border-color:#5b2832}.badge.succeeded{color:#b9f5d8;border-color:#315d49}.badge.processing,.badge.retry,.badge.queued{color:#ffe2a1;border-color:#65542f}
+.action-row{display:flex;gap:6px;align-items:center}.inline-select{width:auto;min-width:92px;padding:7px 8px;font-size:11px}.empty{padding:40px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}.side-bottom{position:static;margin-top:14px}.main{padding:0 16px 40px}.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<section id="loginView" class="login">
+  <div class="login-card">
+    <div class="brand"><div class="mark">L</div> LeadLift Admin</div>
+    <h1>Superuser access</h1>
+    <p>This console can inspect every tenant, user, and qualification job. Use the dedicated admin account only.</p>
+    <form id="loginForm">
+      <label>Username</label><input id="username" autocomplete="username" required>
+      <label>Password</label><input id="password" type="password" autocomplete="current-password" required>
+      <button class="btn full">Sign in</button>
+      <div class="error" id="loginError"></div>
+    </form>
+  </div>
+</section>
+
+<section id="appView" class="shell hidden">
+  <aside class="side">
+    <div class="brand"><div class="mark">L</div> Admin Console</div>
+    <div class="nav-label">System</div>
+    <button class="nav active" data-view="overview">Overview</button>
+    <button class="nav" data-view="organizations">Organizations</button>
+    <button class="nav" data-view="users">Users</button>
+    <button class="nav" data-view="jobs">Qualification queue</button>
+    <div class="nav-label">Workspace</div>
+    <a class="nav" href="/dashboard/">My dashboard</a>
+    <div class="side-bottom">
+      <div class="identity" id="identity">Loading…</div>
+      <button class="btn secondary small" id="logoutBtn" style="width:100%">Log out</button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="top">
+      <h2 id="pageTitle">System overview</h2>
+      <button class="btn secondary small" id="refreshBtn">Refresh</button>
+    </header>
+    <div class="content">
+      <section class="view active" id="view-overview">
+        <div class="kpis">
+          <div class="kpi"><span>Organizations</span><strong id="kpiOrgs">—</strong></div>
+          <div class="kpi"><span>Users</span><strong id="kpiUsers">—</strong></div>
+          <div class="kpi"><span>Leads</span><strong id="kpiLeads">—</strong></div>
+          <div class="kpi"><span>Hot leads</span><strong id="kpiHot">—</strong></div>
+          <div class="kpi"><span>Active jobs</span><strong id="kpiActive">—</strong></div>
+          <div class="kpi"><span>Failed jobs</span><strong id="kpiFailed">—</strong></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Tenant control plane</h3><p>Open any customer workspace with superuser permissions.</p></div></div>
+          <div id="overviewOrgs"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-organizations">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Organizations</h3><p>Plans, subscription state, lead volume, and direct workspace access.</p></div></div>
+          <div id="organizationsTable"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-users">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Users</h3><p>Account status and organization membership.</p></div></div>
+          <div id="usersTable"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-jobs">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Qualification queue</h3><p>Recent queued, processing, completed, retried, and failed jobs.</p></div></div>
+          <div id="jobsTable"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</section>
+<script>
+const $=id=>document.getElementById(id);
+const state={me:null,orgs:[],users:[],jobs:[],view:'overview'};
+const titles={overview:'System overview',organizations:'Organizations',users:'Users',jobs:'Qualification queue'};
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function dateText(v){if(!v)return '—';try{return new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(new Date(v))}catch{return v}}
+async function jfetch(url,opt={}){
+  opt.headers={...(opt.body?{'Content-Type':'application/json'}:{}),...(opt.headers||{})};
+  const r=await fetch(url,opt);let b=null;try{b=await r.json()}catch{}
+  if(!r.ok)throw new Error((b&&b.detail)||`Request failed (${r.status})`);
+  return b
+}
+async function loadSession(){
+  try{
+    const me=await jfetch('/api/v1/auth/me');
+    if(me.role!=='superuser')throw new Error('This account does not have superuser access');
+    state.me=me;$('identity').textContent=`${me.email} · superuser`;
+    $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');
+    await refreshAll();
+  }catch(e){
+    $('appView').classList.add('hidden');$('loginView').classList.remove('hidden');
+    if(e.message!=='Authentication required')$('loginError').textContent=e.message
+  }
+}
+$('loginForm').onsubmit=async e=>{
+  e.preventDefault();$('loginError').textContent='';
+  try{
+    await jfetch('/api/v1/auth/login',{method:'POST',body:JSON.stringify({email:$('username').value.trim(),password:$('password').value})});
+    await loadSession()
+  }catch(err){$('loginError').textContent=err.message}
+};
+function setView(name){
+  state.view=name;document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(`view-${name}`).classList.add('active');
+  document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));$('pageTitle').textContent=titles[name]
+}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$('logoutBtn').onclick=async()=>{await fetch('/api/v1/auth/logout',{method:'POST'});location.reload()};
+$('refreshBtn').onclick=()=>refreshAll();
+
+async function refreshAll(){
+  try{
+    const [overview,orgs,users,jobs]=await Promise.all([
+      jfetch('/api/v1/admin/overview'),jfetch('/api/v1/admin/organizations'),jfetch('/api/v1/admin/users'),jfetch('/api/v1/admin/jobs')
+    ]);
+    state.orgs=orgs;state.users=users;state.jobs=jobs;
+    $('kpiOrgs').textContent=overview.organizations;$('kpiUsers').textContent=overview.users;$('kpiLeads').textContent=overview.leads;
+    $('kpiHot').textContent=overview.hot_leads;$('kpiActive').textContent=overview.active_jobs;$('kpiFailed').textContent=overview.failed_jobs;
+    renderOrganizations();renderUsers();renderJobs()
+  }catch(e){$('loginError').textContent=e.message}
+}
+function renderOrganizations(){
+  const rows=state.orgs;
+  const table=`<div class="table-wrap"><table><thead><tr><th>Organization</th><th>Plan</th><th>Subscription</th><th>Users</th><th>Leads</th><th>Jobs</th><th>Created</th><th>Actions</th></tr></thead><tbody>${
+    rows.map(o=>`<tr><td><strong>${esc(o.name)}</strong>${o.is_internal?'<div class="muted">internal</div>':`<div class="muted">${esc(o.industry)}</div>`}</td>
+      <td><select class="inline-select" data-plan="${esc(o.id)}">${['free','starter','growth'].map(p=>`<option value="${p}" ${o.plan===p?'selected':''}>${p}</option>`).join('')}</select></td>
+      <td>${esc(o.subscription_status)}</td><td>${o.user_count}</td><td>${o.lead_count}</td><td>${o.active_jobs}</td><td>${esc(dateText(o.created_at))}</td>
+      <td>${o.is_internal?'<span class="muted">System</span>':`<a class="btn secondary small" href="/dashboard/?org=${encodeURIComponent(o.id)}">Open workspace</a>`}</td></tr>`).join('')
+  }</tbody></table></div>`;
+  $('organizationsTable').innerHTML=table;$('overviewOrgs').innerHTML=table;
+  document.querySelectorAll('[data-plan]').forEach(s=>s.onchange=()=>updateOrgPlan(s.dataset.plan,s.value))
+}
+async function updateOrgPlan(id,plan){
+  try{await jfetch(`/api/v1/admin/organizations/${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify({plan})});await refreshAll()}
+  catch(e){alert(e.message);await refreshAll()}
+}
+function renderUsers(){
+  if(!state.users.length){$('usersTable').innerHTML='<div class="empty">No users found.</div>';return}
+  $('usersTable').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Login</th><th>Role</th><th>Organization</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${
+    state.users.map(u=>`<tr><td><strong>${esc(u.login)}</strong></td><td><span class="badge ${esc(u.role)}">${esc(u.role)}</span></td><td>${esc(u.organization_name)}</td><td>${u.is_active?'Active':'Disabled'}</td><td>${esc(dateText(u.created_at))}</td>
+      <td>${state.me&&u.id===state.me.id?'<span class="muted">Current account</span>':`<button class="btn ${u.is_active?'danger':'secondary'} small" data-user="${esc(u.id)}" data-active="${u.is_active?'0':'1'}">${u.is_active?'Disable':'Enable'}</button>`}</td></tr>`).join('')
+  }</tbody></table></div>`;
+  document.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>toggleUser(b.dataset.user,b.dataset.active==='1'))
+}
+async function toggleUser(id,isActive){
+  if(!confirm(`${isActive?'Enable':'Disable'} this account?`))return;
+  try{await jfetch(`/api/v1/admin/users/${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify({is_active:isActive})});await refreshAll()}
+  catch(e){alert(e.message)}
+}
+function renderJobs(){
+  if(!state.jobs.length){$('jobsTable').innerHTML='<div class="empty">No qualification jobs yet.</div>';return}
+  $('jobsTable').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Lead</th><th>Organization</th><th>Status</th><th>Attempts</th><th>Created</th><th>Error</th></tr></thead><tbody>${
+    state.jobs.map(j=>`<tr><td><strong>${esc(j.lead_name)}</strong></td><td>${esc(j.organization_name)}</td><td><span class="badge ${esc(j.status)}">${esc(j.status)}</span></td><td>${j.attempts}/${j.max_attempts}</td><td>${esc(dateText(j.created_at))}</td><td class="muted">${esc(j.last_error||'—')}</td></tr>`).join('')
+  }</tbody></table></div>`
+}
+loadSession();
+</script>
+</body>
+</html>
